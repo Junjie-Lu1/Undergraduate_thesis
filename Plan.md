@@ -15,18 +15,18 @@
 2. **模型设计**：复现论文中的模型作为基座，再设计两个分类头，分别进行性别分类和情绪识别。
    
     参考以下：
-    https://blog.csdn.net/mantoudamahou/article/details/134990549
-    https://zhuanlan.zhihu.com/p/667108069
-    https://github.com/eeyhsong/EEG-Conformer
-    https://github.com/braindecode/braindecode/tree/master
-    https://www.scholat.com/teamwork/showPostMessage.html?id=17215
+   - https://blog.csdn.net/mantoudamahou/article/details/134990549
+   - https://zhuanlan.zhihu.com/p/667108069
+   - https://github.com/eeyhsong/EEG-Conformer
+   - https://github.com/braindecode/braindecode/tree/master
+   - https://www.scholat.com/teamwork/showPostMessage.html?id=17215
 
-3. **损失函数**设计联合损失函数，综合考虑性别分类和情绪识别的准确性，促进模型学习到更具代表性的特征，因为主要是情绪识别，所以可以设置情绪识别的损失权重稍微高一些。
-4. **评估与验证**：
+4. **损失函数**设计联合损失函数，综合考虑性别分类和情绪识别的准确性，促进模型学习到更具代表性的特征，因为主要是情绪识别，所以可以设置情绪识别的损失权重稍微高一些。
+5. **评估与验证**：
    - 通过交叉验证或独立测试集评估模型的性能(可以考虑改动版本subject-dependent cross trial的实验，即随机匹配一位男性和女性的数据放一起训练)，比较联合预测的任务是否优于单一任务的预测效果（准确率、F1-score等指标外，也需要讨论对表示学习的影响）。
    - 关于表示学习观察，可以把模型中间层的特征提取，用降维算法可视化，观察聚类效果，可以体现模型表示学习的质量，还可以使用类内、类间的距离这种量化指标。除此之外，也可以冻结前面层，专门训练其他分类器，和之前的对比，如果效果更好，说明是表示学习效果增强的功劳。
 
    - 可以进行鲁棒性测试，对数据增加些许噪声，观察模型的鲁棒性。
    
    - 分析任务相关性，衡量不同性别的EEG的差异，差异大则说明任务有用的可能性大。
-5. **结果分析**：分析模型在性别和情绪两个任务上的表现，探讨性别差异对情绪识别的影响，并提出相应的改进建议。
+6. **结果分析**：分析模型在性别和情绪两个任务上的表现，探讨性别差异对情绪识别的影响，并提出相应的改进建议。
