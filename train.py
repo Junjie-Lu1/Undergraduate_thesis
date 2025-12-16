@@ -64,7 +64,6 @@ def main():
   
             loss_emotion = criterion_emotion(emotion_outputs, labels_emotion)
             loss_sex = criterion_sex(sex_outputs, labels_sex)
-            print(loss_emotion)
             
             # 总损失是两个任务损失的平均值
             total_loss = (loss_emotion + loss_sex) / 2
