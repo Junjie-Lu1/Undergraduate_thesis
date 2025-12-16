@@ -13,6 +13,7 @@ import numpy as np  # 导入numpy库
 import pickle  # 导入pickle库，用于反序列化数据
 import torch  # 导入PyTorch库
 from torch.utils.data import Dataset, DataLoader  # 从PyTorch导入数据集和数据加载器基类
+from torch import nn
 
 sex_list = [0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0]
 class SEEDVDataset(Dataset):  # 定义SEEDVDataset类，继承自PyTorch的Dataset
@@ -75,7 +76,8 @@ class SEEDVDataset(Dataset):  # 定义SEEDVDataset类，继承自PyTorch的Datas
 
     def __getitem__(self, idx):  # 定义根据索引获取样本的方法
         # 将数据转换为PyTorch张量并返回，分别对应特征、标签、置信度评分
-        return torch.tensor(self.X_data[idx], dtype=torch.float32), torch.tensor(self.Y_data[idx], dtype=torch.long), torch.tensor(self.Y_lvl[idx], dtype=torch.float32), torch.tensor(self.Y_sex[idx], dtype=torch.long)
+        return torch.tensor(self.X_data[idx], dtype=torch.float32), torch.tensor(self.Y_data[idx], dtype=torch.long), torch.tensor(self.Y_sex[idx], dtype=torch.long)
+        # return torch.tensor(self.X_data[idx], dtype=torch.float32), torch.tensor(self.Y_data[idx], dtype=torch.long), torch.tensor(self.Y_lvl[idx], dtype=torch.float32), torch.tensor(self.Y_sex[idx], dtype=torch.long)
     
 
 
@@ -102,24 +104,25 @@ if __name__ == "__main__":
 
     # 获取全部数据（替换原“获取一个批次”的代码）
     all_X = []
-    all_Y = []
     all_Y_lvl = []
     all_Y_sex = []
-    for batch_X, batch_Y, batch_Y_lvl, batch_Y_sex in dataloader:
+    for batch_X, batch_Y, batch_Y_sex in dataloader:
+        print("X has NaN:", torch.isnan(batch_X).any())  # 输出均为False
+        print("X has Inf:", torch.isinf(batch_X).any())  # 输出均为False
+        print(batch_Y.dtype) # 输出为torch.int64
+        print(batch_Y) 
         all_X.append(batch_X.cpu())
-        all_Y.append(batch_Y.cpu())
-        all_Y_lvl.append(batch_Y_lvl.cpu())
+        all_Y_lvl.append(batch_Y.cpu())
         all_Y_sex.append(batch_Y_sex.cpu())
-
+        criterion_sex = nn.CrossEntropyLoss()
     # 拼接为完整张量
     all_X = torch.cat(all_X, dim=0)
-    all_Y = torch.cat(all_Y, dim=0)
     all_Y_lvl = torch.cat(all_Y_lvl, dim=0)
     all_Y_sex = torch.cat(all_Y_sex, dim=0)
 
+
     # 打印全部数据形状
     print("全部数据形状：")
-    print(f"X: {len(all_X.shape)}")
-    print(f"Y: {all_Y.shape}")
-    print(f"Y_lvl: {all_Y_lvl.shape}")
+    print(f"X: {(all_X.shape)}")
+    print(f"Y: {all_Y_lvl.shape}")
     print(f"Y_sex: {all_Y_sex.shape}")

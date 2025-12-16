@@ -6,32 +6,20 @@ from torch.utils.data import DataLoader, TensorDataset
 # 导入我们自定义的模块
 from config import Config
 from model import EEGEmotionSexClassifier
+from SEEDVDataset import SEEDVDataset
 
 def main():
     # 1. 加载配置
     config = Config()
     print(f"使用的设备: {config.DEVICE}")
 
-    # 2. 准备数据 (这里使用模拟数据，您需要替换为您自己的数据加载逻辑)
+    # 2. 准备数据
     # --------------------------------------------------------------------
-    # 在您的实际代码中，您应该有一个自定义的Dataset类来加载您的SEED-V数据。
-    # 这里我们创建一些随机数据来演示训练流程。
-    # 假设我们有1000个样本
-    num_samples = 1000
-    # X: [num_samples, 3, 62, 5]
-    mock_X = torch.randn(num_samples, config.TIME_LEN, config.NUM_CHANNELS, config.FREQ_BANDS)
-    # Y_label: [num_samples]
-    mock_Y_label = torch.randint(0, config.NUM_EMOTION_CLASSES, (num_samples,))
-    # Y_sex: [num_samples]
-    mock_Y_sex = torch.randint(0, config.NUM_SEX_CLASSES, (num_samples,))
+    subject_list = list(range(1, 17))  # 1~16被试
+    trial_list = list(range(0, 45))    # 0~44试次
 
-    # 创建一个TensorDataset和DataLoader
-    # TensorDataset可以将多个张量打包成一个数据集
-    train_dataset = TensorDataset(mock_X, mock_Y_label, mock_Y_sex)
-    # DataLoader是PyTorch中用于批量加载数据的工具，非常方便
-    # 它会自动处理打乱、多线程加载等。
-    train_loader = DataLoader(dataset=train_dataset, batch_size=config.BATCH_SIZE, shuffle=True)
-    # --------------------------------------------------------------------
+    train_dataset = SEEDVDataset(subject_list, trial_list, config.ROOT_DIR, config.FEATURE_DIR, seg_len=config.TIME_LEN, skip=1)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=config.BATCH_SIZE, shuffle=True)  # 创建数据加载器
     # 数据准备结束，您的真实数据应该以类似的方式被train_loader加载
 
     # 3. 初始化模型、损失函数和优化器
@@ -72,8 +60,11 @@ def main():
             
             # --- 计算损失 ---
             # 分别计算两个任务的损失
+            # 假设 emotion_logits 是模型输出，labels_emotion 是真实标签
+  
             loss_emotion = criterion_emotion(emotion_outputs, labels_emotion)
             loss_sex = criterion_sex(sex_outputs, labels_sex)
+            print(loss_emotion)
             
             # 总损失是两个任务损失的平均值
             total_loss = (loss_emotion + loss_sex) / 2
@@ -100,7 +91,7 @@ def main():
     # torch.save()用于保存模型的状态字典（state_dict），即模型的参数。
     # 只保存state_dict是一种推荐的做法，因为它更灵活，与模型定义解耦。
     torch.save(model.state_dict(), 'eeg_emotion_sex_model.pth')
-    print("Model saved to eeg_emotion_sex_model.pth")
+    print("模型已经保存到 eeg_emotion_sex_model.pth")
 
 if __name__ == '__main__':
     main()

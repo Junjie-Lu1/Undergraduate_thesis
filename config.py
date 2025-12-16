@@ -1,5 +1,4 @@
-# config.py
-
+import os
 import torch
 
 # 这是一个配置类，用于存储模型和训练所需的所有超参数。
@@ -40,4 +39,7 @@ class Config:
     # 是否使用旋转位置编码。这是一个实验性功能。
     # RoPE可以为序列中的元素提供相对位置信息，在某些任务中可能有效。
     USE_ROPE = False # 默认设置为False，您可以尝试将其改为True
+
+    ROOT_DIR = 'E:/毕业论文/EEGdataset/SEED-V/'  # 定义数据集根目录
+    FEATURE_DIR = os.path.join(ROOT_DIR, 'EEG_DE_features/')  # 定义特征数据目录
 
