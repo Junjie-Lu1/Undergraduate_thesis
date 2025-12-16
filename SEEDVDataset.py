@@ -83,12 +83,43 @@ if __name__ == "__main__":
     ROOT_DIR = 'E:/毕业论文/EEGdataset/SEED-V/'  # 定义数据集根目录
     FEATURE_DIR = os.path.join(ROOT_DIR, 'EEG_DE_features/')  # 定义特征数据目录
     # 示例用法
-    subject_list = ['8']  # 被试列表（此处仅包含被试'1'）
-    trial_list = [1, 2, 3]  # 试次列表（此处包含试次1、2、3）
-    dataset = SEEDVDataset(subject_list, trial_list, ROOT_DIR, FEATURE_DIR, 
-                        seg_len=3, skip=1)  # 实例化数据集，片段长度3，步长1
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)  # 创建数据加载器，批大小4，打乱数据
+    # subject_list = ['1','2']  # 被试列表（此处仅包含被试'1'）
+    # trial_list = [1, 2, 3]  # 试次列表（此处包含试次1、2、3）
+    # dataset = SEEDVDataset(subject_list, trial_list, ROOT_DIR, FEATURE_DIR, 
+    #                     seg_len=3, skip=1)  # 实例化数据集，片段长度3，步长1
+    # dataloader = DataLoader(dataset, batch_size=4, shuffle=True)  # 创建数据加载器，批大小4，打乱数据
 
-    X, Y, Y_lvl, Y_sex= next(iter(dataloader))  # 获取一个批次的数据
-    print(X.shape, Y.shape, Y_lvl.shape)  # 打印特征、标签、置信度评分的形状
-    print(Y_sex.shape)
+    # X, Y, Y_lvl, Y_sex= next(iter(dataloader))  # 获取一个批次的数据
+    # print(X.shape, Y.shape, Y_lvl.shape)  # 打印特征、标签、置信度评分的形状
+    # print(Y_sex.shape)
+
+    # 看一下数据的量级
+    subject_list = list(range(1, 17))  # 1~16被试
+    trial_list = list(range(0, 45))    # 0~44试次
+
+    dataset = SEEDVDataset(subject_list, trial_list, ROOT_DIR, FEATURE_DIR, seg_len=3, skip=1)
+    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)  # 创建数据加载器
+
+    # 获取全部数据（替换原“获取一个批次”的代码）
+    all_X = []
+    all_Y = []
+    all_Y_lvl = []
+    all_Y_sex = []
+    for batch_X, batch_Y, batch_Y_lvl, batch_Y_sex in dataloader:
+        all_X.append(batch_X.cpu())
+        all_Y.append(batch_Y.cpu())
+        all_Y_lvl.append(batch_Y_lvl.cpu())
+        all_Y_sex.append(batch_Y_sex.cpu())
+
+    # 拼接为完整张量
+    all_X = torch.cat(all_X, dim=0)
+    all_Y = torch.cat(all_Y, dim=0)
+    all_Y_lvl = torch.cat(all_Y_lvl, dim=0)
+    all_Y_sex = torch.cat(all_Y_sex, dim=0)
+
+    # 打印全部数据形状
+    print("全部数据形状：")
+    print(f"X: {len(all_X.shape)}")
+    print(f"Y: {all_Y.shape}")
+    print(f"Y_lvl: {all_Y_lvl.shape}")
+    print(f"Y_sex: {all_Y_sex.shape}")
