@@ -7,11 +7,13 @@ from torch.utils.data import DataLoader, TensorDataset
 from config import Config
 from model import EEGEmotionSexClassifier
 from SEEDVDataset import SEEDVDataset
+from Loss_function import MultiTaskLoss
 
 def main():
     # 1. 加载配置
     config = Config()
     print(f"使用的设备: {config.DEVICE}")
+    print(f"使用的损失函数：{config.LOSS_METHOD}")
 
     # 2. 准备数据
     # --------------------------------------------------------------------
@@ -31,6 +33,15 @@ def main():
     # 它期望的输入是模型的原始输出，标签是类别索引。
     criterion_emotion = nn.CrossEntropyLoss() 
     criterion_sex = nn.CrossEntropyLoss()
+
+    # 初始化多任务损失函数
+    loss_fn = MultiTaskLoss(
+        config,
+        method=config.LOSS_METHOD,
+        alpha1=config.ALPHA1,
+        alpha2=config.ALPHA2,
+        gamma=config.GAMMA
+    )
     
     # optim.Adam 需要调整的参数是模型的参数（model.parameters()）和学习率。
     optimizer = optim.Adam(model.parameters(), lr=config.LEARNING_RATE)
@@ -65,8 +76,12 @@ def main():
             loss_emotion = criterion_emotion(emotion_outputs, labels_emotion)
             loss_sex = criterion_sex(sex_outputs, labels_sex)
             
-            # 总损失是两个任务损失的平均值
-            total_loss = (loss_emotion + loss_sex) / 2
+            if config.LOSS_METHOD == 'grad_norm':
+                total_loss = loss_fn.grad_normalized_loss(
+                    loss_emotion, loss_sex, model
+                )
+            else:
+                total_loss = loss_fn(loss_emotion, loss_sex)
             
             # --- 反向传播 ---
             # .backward()会自动计算所有参数的梯度

@@ -28,6 +28,12 @@ class Config:
     # 性别分类任务的类别数
     NUM_SEX_CLASSES = 2
 
+    # --- 损失函数相关参数 ---
+    LOSS_METHOD = 'dynamic'  # 可选: 'simple', 'init', 'prior', 'dynamic', 'generalized', 'grad_norm'
+    ALPHA1 = 1.0  # 情绪任务权重
+    ALPHA2 = 1.0  # 性别任务权重
+    GAMMA = 2.0   # 广义平均损失的超参数
+
     # --- 训练相关参数 ---
     LEARNING_RATE = 1e-4  # 优化器（如Adam）的学习率
     NUM_EPOCHS = 100      # 训练的总轮数
