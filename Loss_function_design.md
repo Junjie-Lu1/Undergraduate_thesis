@@ -56,7 +56,7 @@ $$f'(\gamma) = \dfrac{1}{\gamma^2}\left(\dfrac{\gamma(L_1^{\gamma}\ln L_1+L_2^{\
 
 $$\dfrac{\gamma(L_1^{\gamma}\ln L_1+L_2^{\gamma}\ln L_2)}{L_1^{\gamma} + L_2^{\gamma}} - \ln(L_1^{\gamma} + L_2^{\gamma}) $$
 
-$$= \dfrac{L_1^{\gamma}\ln L_1^\gamma+L_2^{\gamma}\ln L_2^\gamma}{L_1^{\gamma} + L_2^{\gamma}} - \ln(L_1^{\gamma} + L_2^{\gamma})$$ 
+$$= \dfrac{L_1^{\gamma}\ln L_1^{\gamma}+L_2^{\gamma}\ln L_2^{\gamma}}{L_1^{\gamma} + L_2^{\gamma}} - \ln(L_1^{\gamma} + L_2^{\gamma})$$
 
 $$ = \dfrac{L_1^{\gamma}}{L_1^{\gamma} + L_2^{\gamma}}\ln L_1^{\gamma}+\dfrac{L_2^{\gamma}}{L_1^{\gamma} + L_2^{\gamma}}\ln L_2^{\gamma} - \ln(L_1^{\gamma} + L_2^{\gamma})$$
 
@@ -112,9 +112,9 @@ $$\langle\Delta\theta, \nabla_{\theta}L_1\rangle\leq 0 $$
 
 实际上，我们研究的是基于性别-情绪的双任务情绪 $\text{EEG}$ 识别，可以看出这里的任务有主次之分，我们的主要目标是提升情绪识别的准确性，而辅助任务是性别分类，前面的广义平均损失函数能够根据 $\gamma$ 的设置倾向于关注更大的损失或是更小的损失，但我们在训练之前并不知道两个任务损失的大小关系，而如果只是给予情绪分类任务更大的权重，和前面讲述的一样，这种事先设定的方法似乎又太过于死板。我们选择从另一个角度出发，绕过定义损失的权重组合，在更加基本的方面切入。
 
-我们对于任一损失函数 $L$，设计一个适合主次双任务的优化器，假设情绪任务的损失为 $L_1$，性别任务的损失为 $L_2$，根据泰勒展开，
+我们不受限于具体的损失函数 $L$，设计一个适合主次双任务的优化器，假设情绪任务的损失为 $L_1$，性别任务的损失为 $L_2$，根据泰勒展开，
 
-$$L_i(\theta+\Delta \theta) = \nabla_{\theta}L_i\cdot\Delta\theta + o((\Delta\theta)^2)$$
+$$L_i(\theta+\Delta \theta) = L_i(\theta) + \nabla_{\theta}L_i\cdot\Delta\theta + o((\Delta\theta)^2)$$
 
 因为 $\Delta\theta$ 一般取比较小的数，那么只要 $\langle\Delta\theta,\nabla_{\theta}L_i\rangle \leq 0$，就能够实现损失函数的下降。在主次任务中，我们当然希望 $\langle\Delta\theta,\nabla_{\theta}L_1\rangle$ 越小越好，并且保持 $\langle\Delta\theta,\nabla_{\theta}L_2\rangle\leq 0$，但为了防止模型通过大量增加 $\Delta\theta$ 使得 $\langle\Delta\theta,\nabla_{\theta}L_1\rangle$ 很小，我们还需要增加一个正则项，设 $\Delta\theta = -\eta h$，上述可以归结到一个优化问题：
 
@@ -124,7 +124,7 @@ $$\max_{h}\langle h,\nabla_{\theta}L_1\rangle - \dfrac{1}{2}||h||^2,\quad\langle
 
 $$\max_{h}\min_{\lambda\geq 0}\langle h,\nabla_{\theta}L_1\rangle - \dfrac{1}{2}||h||^2+\lambda\langle h,\nabla_{\theta}L_2\rangle$$
 
-因为----根据冯・诺依曼极大极小定理，上述优化问题等价于
+根据冯・诺依曼极大极小定理，上述优化问题等价于
 
 $$\min_{\lambda\geq 0}\max_{h}\langle h,\nabla_{\theta}L_1+\lambda\nabla_{\theta}L_2\rangle - \dfrac{1}{2}||h||^2$$
 

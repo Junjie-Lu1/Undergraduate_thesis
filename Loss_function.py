@@ -59,19 +59,23 @@ class MultiTaskLoss(nn.Module):
                    loss_sex ** self.gamma) ** (1/self.gamma)
         
         else:
-            raise ValueError(f"Unknown loss method: {self.method}")
+            raise ValueError(f"输入的方法不存在: {self.method}")
 
     @staticmethod
     def compute_grad_norm(loss, model):
         """计算损失对模型参数的梯度范数"""
         grads = torch.autograd.grad(loss, model.parameters(), 
                                   create_graph=False, retain_graph=True, allow_unused=True)
+        # 这边有个问题，create_graph=False是不创建梯度的计算图（支持高阶导数计算），但是原来的激活值计算图还在，使用autograd的时候会用这个计算图，而且用完就把激活值都释放了，所以得加上retrain_graph = True，
+        # 这个值可能有时候不会用到，要加上 allow_unused=True
         grad_norm = torch.sqrt(sum(g.norm()**2 for g in grads if g is not None))
+        
         return grad_norm
 
     def grad_normalized_loss(self, loss_emotion, loss_sex, model):
         """梯度归一化损失"""
         with torch.no_grad():
+            # 不写这个的话会报错，估计是虽然设置了create_graph=False，但给出的结果还是会带一些梯度跟踪属性，导致反向的时候出错
             grad_norm1 = self.compute_grad_norm(loss_emotion, model)
             grad_norm2 = self.compute_grad_norm(loss_sex, model)
         

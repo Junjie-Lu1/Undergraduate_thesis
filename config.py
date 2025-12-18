@@ -35,7 +35,7 @@ class Config:
     GAMMA = 2.0   # 广义平均损失的超参数
 
     # --- 训练相关参数 ---
-    LEARNING_RATE = 1e-4  # 优化器（如Adam）的学习率
+    LEARNING_RATE = 1e-6  # 优化器的学习率
     NUM_EPOCHS = 100      # 训练的总轮数
 
     # --- 其他参数 ---
